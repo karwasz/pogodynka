@@ -292,11 +292,11 @@ nav{background:var(--nav);border-bottom:1px solid var(--border);padding:0 28px;d
 <!-- NAV -->
 <nav>
   <div class="nav-tabs">
-    <button class="ntab active">🌤 Pogoda</button>
-    <button class="ntab">📅 Prognoza</button>
-    <button class="ntab">🌧 Opady</button>
-    <button class="ntab">⚠️ Alerty</button>
-    <button class="ntab">📊 Historia</button>
+    <button class="ntab active" onclick="navClick('sec-pogoda',this)">🌤 Pogoda</button>
+    <button class="ntab" onclick="navClick('sec-prognoza',this)">📅 Prognoza</button>
+    <button class="ntab" onclick="navClick('sec-opady',this)">🌧 Opady</button>
+    <button class="ntab" onclick="navClick('sec-alerty',this)">⚠️ Alerty</button>
+    <button class="ntab" onclick="navClick('sec-historia',this)">📊 Historia</button>
   </div>
   <div class="nav-icons">
     <div class="nicon">🔍</div>
@@ -318,7 +318,7 @@ nav{background:var(--nav);border-bottom:1px solid var(--border);padding:0 28px;d
 </div>
 
 <!-- S1: main weather + wind/pollen/aqi -->
-<div class="s1-grid">
+<div id="sec-pogoda" class="s1-grid">
 
   <!-- LEFT: temp + stats -->
   <div class="card temp-card">
@@ -507,7 +507,7 @@ nav{background:var(--nav);border-bottom:1px solid var(--border);padding:0 28px;d
 </div>
 
 <!-- S3: AI Forecast -->
-<div class="ai-section">
+<div id="sec-prognoza" class="ai-section">
   <div class="ai-header">
     <span style="font-size:1.1rem">🤖</span>
     <span style="font-weight:800;font-size:0.95rem">Prognoza AI</span>
@@ -521,7 +521,7 @@ nav{background:var(--nav);border-bottom:1px solid var(--border);padding:0 28px;d
 </div>
 
 <!-- S4: Rain -->
-<div class="rain-section">
+<div id="sec-opady" class="rain-section">
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
     <span style="font-size:1rem">🌧</span>
     <span style="font-weight:800;font-size:0.95rem">Czy będzie padać w Nowym Prażmowie?</span>
@@ -578,7 +578,7 @@ nav{background:var(--nav);border-bottom:1px solid var(--border);padding:0 28px;d
 </div>
 
 <!-- S6: Day summary -->
-<div class="day-summary">
+<div id="sec-alerty" class="day-summary">
   <div style="display:flex;align-items:center;gap:8px">
     <span style="font-size:1rem">☀️</span>
     <span style="font-weight:800;font-size:0.95rem">Pogoda Nowy Prażmów dziś</span>
@@ -600,7 +600,7 @@ nav{background:var(--nav);border-bottom:1px solid var(--border);padding:0 28px;d
 </div>
 
 <!-- S7: Charts -->
-<div class="charts-section">
+<div id="sec-historia" class="charts-section">
   <div class="chart-section-title">
     <span style="font-size:1rem">📈</span>
     <h2>Dane historyczne — ostatnie 24h</h2>
@@ -975,6 +975,17 @@ async function fetchAll(){
     document.getElementById('errscreen').style.display='block';
     document.getElementById('errtxt').innerHTML='Błąd pobierania danych.<br><small>'+err.message+'</small>';
     console.error(err);
+  }
+}
+
+function navClick(sectionId, btn){
+  document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const el=document.getElementById(sectionId);
+  if(el){
+    const offset=60; // nav height
+    const top=el.getBoundingClientRect().top+window.scrollY-offset;
+    window.scrollTo({top,behavior:'smooth'});
   }
 }
 
