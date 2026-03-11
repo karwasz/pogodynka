@@ -969,6 +969,7 @@ async function fetchAll(){
 
     document.getElementById('loadscreen').style.display='none';
     document.getElementById('mainpage').style.display='block';
+    initScrollSpy();
 
   }catch(err){
     document.getElementById('loadscreen').style.display='none';
@@ -978,16 +979,40 @@ async function fetchAll(){
   }
 }
 
+const NAV_SECTIONS=['sec-pogoda','sec-prognoza','sec-opady','sec-alerty','sec-historia'];
+
 function navClick(sectionId, btn){
   document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   const el=document.getElementById(sectionId);
   if(el){
-    const offset=60; // nav height
+    const offset=60;
     const top=el.getBoundingClientRect().top+window.scrollY-offset;
     window.scrollTo({top,behavior:'smooth'});
   }
 }
+
+function initScrollSpy(){
+  const tabs=document.querySelectorAll('.ntab');
+  const observer=new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        const idx=NAV_SECTIONS.indexOf(entry.target.id);
+        if(idx!==-1){
+          tabs.forEach(b=>b.classList.remove('active'));
+          tabs[idx].classList.add('active');
+        }
+      }
+    });
+  },{rootMargin:'-60px 0px -60% 0px',threshold:0});
+  NAV_SECTIONS.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)observer.observe(el);
+  });
+}
+
+// init after page renders
+document.addEventListener('DOMContentLoaded',()=>setTimeout(initScrollSpy,500));
 
 fetchAll();
 setInterval(fetchAll,5*60*1000);
