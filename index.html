@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pogoda — Nowy Prazmow</title>
+<title>Pogoda — Nowy Prażmów</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
@@ -638,8 +638,9 @@ const STATION='INOWYP6';
 // Nowy Targ coords for Open-Meteo
 const LAT=49.477, LON=20.032;
 
-const CURR=`https://api.weather.com/v2/pws/observations/current?stationId=${STATION}&format=json&units=m&apiKey=${API_KEY}&numericPrecision=decimal`;
-const HIST=`https://api.weather.com/v2/pws/observations/hourly/7day?stationId=${STATION}&format=json&units=m&apiKey=${API_KEY}&numericPrecision=decimal`;
+const PROXY='https://corsproxy.io/?url=';
+const CURR=PROXY+encodeURIComponent(`https://api.weather.com/v2/pws/observations/current?stationId=${STATION}&format=json&units=m&apiKey=${API_KEY}&numericPrecision=decimal`);
+const HIST=PROXY+encodeURIComponent(`https://api.weather.com/v2/pws/observations/hourly/7day?stationId=${STATION}&format=json&units=m&apiKey=${API_KEY}&numericPrecision=decimal`);
 const METEO=`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weathercode,windspeed_10m_max&hourly=precipitation_probability,precipitation&current_weather=true&timezone=Europe%2FWarsaw&forecast_days=7`;
 
 function r1(v){return(v!==null&&v!==undefined)?Math.round(v*10)/10:'--'}
