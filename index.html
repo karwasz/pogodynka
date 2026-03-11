@@ -1016,8 +1016,13 @@ async function fetchAll(){
       // Sun times
       setSunTimes(daily.sunrise?.[0], daily.sunset?.[0]);
 
-      // AI text
+      // Daily max/min from Open-Meteo (more accurate than hourly tempHigh)
       const t0=daily.temperature_2m_max[0], t1=daily.temperature_2m_min[0];
+      document.getElementById('tmaxpill').textContent=r1(t0);
+      document.getElementById('feelsmax').textContent=r1(t0)+'°C';
+      document.getElementById('ds-temp2').textContent=`Min ${r1(t1)}°C / Maks ${r1(t0)}°C`;
+
+      // AI text
       const rain0=daily.precipitation_sum[0], rainPct0=daily.precipitation_probability_max[0];
       const aiEl=document.getElementById('aitext');
       aiEl.innerHTML=`Prognozowana temperatura waha się między <strong>${r1(t1)}°C</strong> a <strong>${r1(t0)}°C</strong>. Szansa opadów wynosi <strong>${rainPct0}%</strong>, przy sumie opadów <strong>${r1(rain0)} mm</strong>. ${rainPct0>60?'Warto zabrać parasol.':'Warunki bez opadów — komfortowy dzień.'} Temperatura odczuwalna około <strong>${feelsLike}°C</strong>, przy wietrze ${ws} km/h z kierunku ${degToDir(wd)}.`;
