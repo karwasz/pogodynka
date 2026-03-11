@@ -641,7 +641,7 @@ const LAT=51.896, LON=20.924;
 const PROXY='https://corsproxy.io/?url=';
 const CURR=PROXY+encodeURIComponent(`https://api.weather.com/v2/pws/observations/current?stationId=${STATION}&format=json&units=m&apiKey=${API_KEY}&numericPrecision=decimal`);
 const HIST=PROXY+encodeURIComponent(`https://api.weather.com/v2/pws/observations/hourly/7day?stationId=${STATION}&format=json&units=m&apiKey=${API_KEY}&numericPrecision=decimal`);
-const METEO=`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weathercode,windspeed_10m_max&hourly=precipitation_probability,precipitation&current_weather=true&timezone=Europe%2FWarsaw&forecast_days=7`;
+const METEO=`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weathercode,windspeed_10m_max,sunrise,sunset&hourly=precipitation_probability,precipitation&current_weather=true&timezone=Europe%2FWarsaw&forecast_days=7`;
 
 function r1(v){return(v!==null&&v!==undefined)?Math.round(v*10)/10:'--'}
 function r0(v){return(v!==null&&v!==undefined)?Math.round(v):'--'}
@@ -699,10 +699,10 @@ function dayName(dateStr,i){
   return d.toLocaleDateString('pl-PL',{weekday:'short'}).replace('.','');
 }
 
-function setSunTimes(){
-  // Approximate for Nowy Prażmów, March
-  document.getElementById('sunrise').textContent='06:18';
-  document.getElementById('sunset').textContent='18:02';
+function setSunTimes(sunriseISO, sunsetISO){
+  const fmt=s=>s?s.slice(11,16):'--:--';
+  document.getElementById('sunrise').textContent=fmt(sunriseISO);
+  document.getElementById('sunset').textContent=fmt(sunsetISO);
 }
 
 let tempChart, rainChart, humChart, solarChart, weekChart;
@@ -854,12 +854,13 @@ async function fetchAll(){
     document.getElementById('ds-humd').textContent=hum>80?'Bardzo wilgotno':hum>60?'Umiarkowanie':hum<40?'Sucho':'Komfortowo';
     document.getElementById('ds-vis').textContent='ok. 20';
 
-    setSunTimes();
-
     // ── METEO (Open-Meteo) ──
     if(meteoR.ok){
       const meteo=await meteoR.json();
       const daily=meteo.daily;
+
+      // Sun times
+      setSunTimes(daily.sunrise?.[0], daily.sunset?.[0]);
 
       // AI text
       const t0=daily.temperature_2m_max[0], t1=daily.temperature_2m_min[0];
