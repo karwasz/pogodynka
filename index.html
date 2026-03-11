@@ -309,7 +309,7 @@ nav{background:var(--nav);border-bottom:1px solid var(--border);padding:0 28px;d
 
 <!-- TITLE -->
 <div class="ptitle">
-  <h1>Pogoda w <span id="city">Nowym Targu</span></h1>
+  <h1>Pogoda w <span id="city">Nowym Prażmowie</span></h1>
   <div class="live-row">
     <div class="lpill"><div class="ldot"></div> LIVE</div>
     <span>📍 Stacja INOWYP6</span>
@@ -322,7 +322,7 @@ nav{background:var(--nav);border-bottom:1px solid var(--border);padding:0 28px;d
 
   <!-- LEFT: temp + stats -->
   <div class="card temp-card">
-    <div class="clabel">Pogoda w Nowym Targu</div>
+    <div class="clabel">Pogoda w Nowym Prażmowie</div>
     <div class="temp-row">
       <div class="wicon" id="wicon">🌤</div>
       <div class="temp-nums">
@@ -524,7 +524,7 @@ nav{background:var(--nav);border-bottom:1px solid var(--border);padding:0 28px;d
 <div class="rain-section">
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
     <span style="font-size:1rem">🌧</span>
-    <span style="font-weight:800;font-size:0.95rem">Czy będzie padać w Nowym Targu?</span>
+    <span style="font-weight:800;font-size:0.95rem">Czy będzie padać w Nowym Prażmowie?</span>
   </div>
   <div style="font-size:0.78rem;color:var(--text2);margin-bottom:14px">Prognoza opadów na najbliższe godziny na podstawie Open-Meteo.</div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
@@ -534,8 +534,8 @@ nav{background:var(--nav);border-bottom:1px solid var(--border);padding:0 28px;d
   </div>
   <div class="rain-bar-main"><div class="rain-bar-fill" id="rainbarfill" style="width:0%"></div></div>
   <div class="rain-qa">
-    <div class="rain-q">Czy dziś będzie padać w Nowym Targu?</div>
-    <div class="rain-q">Czy w najbliższych godzinach będzie padać w Nowym Targu?</div>
+    <div class="rain-q">Czy dziś będzie padać w Nowym Prażmowie?</div>
+    <div class="rain-q">Czy w najbliższych godzinach będzie padać w Nowym Prażmowie?</div>
     <div class="rain-q">Czy teraz padają opady nad Nowym Targiem?</div>
   </div>
 </div>
@@ -549,7 +549,7 @@ nav{background:var(--nav);border-bottom:1px solid var(--border);padding:0 28px;d
     <div class="comfort-score-row"><div class="cnum" id="cnum2">--</div><div class="cdenom">/10</div></div>
     <div class="clbl2" id="clbl2">--</div>
     <div class="cbar-wrap"><div class="cbar-fill" id="cbar2" style="width:0%"></div></div>
-    <div style="margin-top:10px;font-size:0.76rem;color:var(--text2)">Jakość powietrza w Nowym Targu dziś:</div>
+    <div style="margin-top:10px;font-size:0.76rem;color:var(--text2)">Jakość powietrza w Nowym Prażmowie dziś:</div>
     <div class="c-tomorrow">
       <span>Jutro prognoza:</span>
       <span class="val" id="ctomorrow">--</span>
@@ -581,7 +581,7 @@ nav{background:var(--nav);border-bottom:1px solid var(--border);padding:0 28px;d
 <div class="day-summary">
   <div style="display:flex;align-items:center;gap:8px">
     <span style="font-size:1rem">☀️</span>
-    <span style="font-weight:800;font-size:0.95rem">Pogoda Nowy Targ dziś</span>
+    <span style="font-weight:800;font-size:0.95rem">Pogoda Nowy Prażmów dziś</span>
   </div>
   <div class="ds-grid">
     <div class="ds-item"><div class="ds-lbl">🌡 Temperatura</div><div class="ds-val" id="ds-temp">--°C</div><div class="ds-sub" id="ds-temp2">--</div></div>
@@ -635,8 +635,8 @@ nav{background:var(--nav);border-bottom:1px solid var(--border);padding:0 28px;d
 <script>
 const API_KEY='b7a3062394a24d9ea3062394a2ed9e59';
 const STATION='INOWYP6';
-// Nowy Prazmow coords for Open-Meteo
-const LAT=51.96, LON=20.95;
+// Nowy Prażmów coords for Open-Meteo
+const LAT=51.896, LON=20.924;
 
 const PROXY='https://corsproxy.io/?url=';
 const CURR=PROXY+encodeURIComponent(`https://api.weather.com/v2/pws/observations/current?stationId=${STATION}&format=json&units=m&apiKey=${API_KEY}&numericPrecision=decimal`);
@@ -700,7 +700,7 @@ function dayName(dateStr,i){
 }
 
 function setSunTimes(){
-  // Approximate for Nowy Prazmow, March
+  // Approximate for Nowy Prażmów, March
   document.getElementById('sunrise').textContent='06:18';
   document.getElementById('sunset').textContent='18:02';
 }
@@ -822,7 +822,7 @@ async function fetchAll(){
     document.getElementById('rain2').textContent=rain;
     document.getElementById('raindelta').textContent=rain>0?'↑ Dziś padało':'— Brak opadów';
     document.getElementById('raindelta').className='s2-delta '+(rain>0?'d-up':'d-flat');
-    document.getElementById('presdelta').textContent=pres>1020?'↑ Wysokie':'pres<1000?↓ Niskie':'→ Normalne';
+    document.getElementById('presdelta').textContent=pres>1020?'↑ Wysokie':pres<1000?'↓ Niskie':'→ Normalne';
     document.getElementById('presdelta').className='s2-delta '+(pres>1020?'d-up':pres<1000?'d-down':'d-flat');
 
     // s2b
