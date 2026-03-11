@@ -335,7 +335,7 @@ nav{background:var(--nav);border-bottom:1px solid var(--border);padding:0 28px;d
       <div class="sbox"><div class="sbox-icon">💧</div><div><div class="sbox-lbl">Wilgotność</div><div class="sbox-val" id="hum">--%</div></div></div>
       <div class="sbox"><div class="sbox-icon">🔵</div><div><div class="sbox-lbl">Ciśnienie</div><div class="sbox-val" id="pres">-- hPa</div></div></div>
       <div class="sbox"><div class="sbox-icon">💨</div><div><div class="sbox-lbl">Wiatr</div><div class="sbox-val" id="wstat">-- km/h</div></div></div>
-      <div class="sbox"><div class="sbox-icon">☁️</div><div><div class="sbox-lbl">Zachmurzenie</div><div class="sbox-val" id="cloud">-- %</div></div></div>
+
       <div class="sbox"><div class="sbox-icon">☀️</div><div><div class="sbox-lbl">Indeks UV</div><div class="sbox-val" id="uv">-- <small style="font-size:0.6rem;color:var(--muted2)" id="uvlbl"></small></div></div></div>
     </div>
   </div>
@@ -388,25 +388,17 @@ nav{background:var(--nav);border-bottom:1px solid var(--border);padding:0 28px;d
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
         <span style="font-size:1rem">🌿</span>
         <span style="font-weight:700;font-size:0.88rem">Pyłki w powietrzu</span>
-        <div class="pollen-warn-badge">Ryzyko alergii: WYSOKIE</div>
+        <div class="pollen-warn-badge" id="pollen-risk">—</div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <div>
-          <div class="pbars">
-            <div class="prow"><div class="pname">Drzewa</div><div class="pdots"><div class="pdot fh"></div><div class="pdot fh"></div><div class="pdot fh"></div><div class="pdot fh"></div><div class="pdot"></div></div><div class="pscore">4/5</div></div>
-            <div class="prow"><div class="pname">Trawy/Zioła</div><div class="pdots"><div class="pdot"></div><div class="pdot"></div><div class="pdot"></div><div class="pdot"></div><div class="pdot"></div></div><div class="pscore">0/5</div></div>
-            <div class="prow"><div class="pname">Grzyby</div><div class="pdots"><div class="pdot f"></div><div class="pdot f"></div><div class="pdot"></div><div class="pdot"></div><div class="pdot"></div></div><div class="pscore">2/5</div></div>
-          </div>
-          <div style="margin-top:8px;font-size:0.66rem;color:var(--muted)">🌸 Główne źródła: drzewa</div>
+          <div class="pbars" id="pollen-bars"><!-- JS --></div>
+          <div style="margin-top:8px;font-size:0.66rem;color:var(--muted)" id="pollen-src">—</div>
         </div>
         <div>
           <div class="clabel" style="margin-bottom:6px">Dominujące</div>
-          <div class="dom-section">
-            <div class="dom-row"><span class="dom-name">Olsza</span><div class="dom-dots-mini"><div class="dmini" style="background:var(--warn)"></div><div class="dmini" style="background:var(--warn)"></div><div class="dmini" style="background:var(--warn)"></div><div class="dmini" style="background:var(--warn)"></div><div class="dmini" style="background:var(--warn)"></div></div></div>
-            <div class="dom-row"><span class="dom-name">Leszczyna</span><div class="dom-dots-mini"><div class="dmini" style="background:var(--warn)"></div><div class="dmini" style="background:var(--accent3)"></div><div class="dmini" style="background:rgba(255,255,255,0.1)"></div><div class="dmini" style="background:rgba(255,255,255,0.1)"></div><div class="dmini" style="background:rgba(255,255,255,0.1)"></div></div></div>
-            <div class="dom-row"><span class="dom-name">Brzoza</span><div class="dom-dots-mini"><div class="dmini" style="background:var(--accent2)"></div><div class="dmini" style="background:rgba(255,255,255,0.1)"></div><div class="dmini" style="background:rgba(255,255,255,0.1)"></div><div class="dmini" style="background:rgba(255,255,255,0.1)"></div><div class="dmini" style="background:rgba(255,255,255,0.1)"></div></div></div>
-          </div>
-          <div style="margin-top:6px"><span style="font-size:0.65rem;color:var(--text2)">Warunki:</span> <span style="font-size:0.65rem;background:rgba(255,179,0,0.12);border:1px solid rgba(255,179,0,0.22);border-radius:6px;padding:1px 7px;color:var(--warn);font-weight:700">umiarkowane</span></div>
+          <div class="dom-section" id="pollen-dom"><!-- JS --></div>
+          <div style="margin-top:6px" id="pollen-cond"></div>
         </div>
       </div>
     </div>
@@ -642,6 +634,7 @@ const PROXY='https://corsproxy.io/?url=';
 const CURR=PROXY+encodeURIComponent(`https://api.weather.com/v2/pws/observations/current?stationId=${STATION}&format=json&units=m&apiKey=${API_KEY}&numericPrecision=decimal`);
 const HIST=PROXY+encodeURIComponent(`https://api.weather.com/v2/pws/observations/hourly/7day?stationId=${STATION}&format=json&units=m&apiKey=${API_KEY}&numericPrecision=decimal`);
 const METEO=`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weathercode,windspeed_10m_max,sunrise,sunset&hourly=precipitation_probability,precipitation&current_weather=true&timezone=Europe%2FWarsaw&forecast_days=7`;
+const AQI_URL=`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&current=european_aqi,pm2_5,pm10,alder_pollen,birch_pollen,grass_pollen,mugwort_pollen&timezone=Europe%2FWarsaw`;
 
 function r1(v){return(v!==null&&v!==undefined)?Math.round(v*10)/10:'--'}
 function r0(v){return(v!==null&&v!==undefined)?Math.round(v):'--'}
@@ -699,6 +692,36 @@ function dayName(dateStr,i){
   return d.toLocaleDateString('pl-PL',{weekday:'short'}).replace('.','');
 }
 
+function pollenScore(v){
+  if(!v||v<=0)return 0;if(v<=5)return 1;if(v<=20)return 2;if(v<=80)return 3;if(v<=200)return 4;return 5;
+}
+function pollenDotsHTML(score){
+  const cls=score<=2?'f':'fh';
+  return Array.from({length:5},(_,i)=>`<div class="pdot${i<score?' '+cls:''}"></div>`).join('');
+}
+function domDotsHTML(score){
+  const colors=['rgba(255,255,255,0.07)','var(--accent2)','var(--warn)','var(--warn)','var(--accent3)','var(--danger)'];
+  const c=colors[score]||'rgba(255,255,255,0.07)';
+  return Array.from({length:5},(_,i)=>`<div class="dmini" style="background:${i<score?c:'rgba(255,255,255,0.1)'}"></div>`).join('');
+}
+function setPollenCard(ac){
+  const species=[{name:'Olsza',val:ac.alder_pollen??0},{name:'Brzoza',val:ac.birch_pollen??0},{name:'Trawy',val:ac.grass_pollen??0},{name:'Bylica',val:ac.mugwort_pollen??0}];
+  const treeScore=pollenScore(Math.max(ac.alder_pollen??0,ac.birch_pollen??0));
+  const grassScore=pollenScore(ac.grass_pollen??0);
+  const herbScore=pollenScore(ac.mugwort_pollen??0);
+  document.getElementById('pollen-bars').innerHTML=[{n:'Drzewa',s:treeScore},{n:'Trawy',s:grassScore},{n:'Bylica',s:herbScore}].map(r=>`<div class="prow"><div class="pname">${r.n}</div><div class="pdots">${pollenDotsHTML(r.s)}</div><div class="pscore">${r.s}/5</div></div>`).join('');
+  const maxScore=Math.max(treeScore,grassScore,herbScore);
+  const riskLabels=['BRAK','NISKIE','NISKIE','UMIARKOWANE','WYSOKIE','BARDZO WYSOKIE'];
+  const riskColors=['var(--good)','var(--accent2)','var(--accent2)','var(--warn)','var(--accent3)','var(--danger)'];
+  const riskEl=document.getElementById('pollen-risk');
+  riskEl.textContent='Ryzyko: '+riskLabels[maxScore];riskEl.style.color=riskColors[maxScore];
+  const top=species.filter(s=>s.val>0).sort((a,b)=>b.val-a.val);
+  document.getElementById('pollen-src').textContent=top.length?'🌸 Główne: '+top.slice(0,2).map(s=>s.name).join(', '):'🌿 Brak aktywnych pyłków';
+  document.getElementById('pollen-dom').innerHTML=[...species].sort((a,b)=>b.val-a.val).slice(0,3).map(s=>`<div class="dom-row"><span class="dom-name">${s.name}</span><div class="dom-dots-mini">${domDotsHTML(pollenScore(s.val))}</div></div>`).join('');
+  const condLabels=['brak','niskie','niskie','umiarkowane','wysokie','bardzo wysokie'];
+  document.getElementById('pollen-cond').innerHTML=`<span style="font-size:0.65rem;color:var(--text2)">Warunki:</span> <span style="font-size:0.65rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:1px 7px;color:${riskColors[maxScore]};font-weight:700">${condLabels[maxScore]}</span>`;
+}
+
 function setSunTimes(sunriseISO, sunsetISO){
   const fmt=s=>s?s.slice(11,16):'--:--';
   document.getElementById('sunrise').textContent=fmt(sunriseISO);
@@ -746,8 +769,8 @@ function makeBarChart(id, labels, data, color){
 
 async function fetchAll(){
   try{
-    const [currR, histR, meteoR] = await Promise.all([
-      fetch(CURR), fetch(HIST), fetch(METEO)
+    const [currR, histR, meteoR, aqiR] = await Promise.all([
+      fetch(CURR), fetch(HIST), fetch(METEO), fetch(AQI_URL)
     ]);
 
     // ── CURRENT ──
@@ -776,7 +799,7 @@ async function fetchAll(){
     document.getElementById('hum').textContent=hum+'%';
     document.getElementById('pres').textContent=pres+' hPa';
     document.getElementById('wstat').textContent=ws+' km/h';
-    document.getElementById('cloud').textContent='—';
+
     document.getElementById('uv').innerHTML=`${uvVal} <small style="font-size:0.6rem;color:var(--text2)">${uvLbl}</small>`;
 
     // wind
@@ -791,12 +814,28 @@ async function fetchAll(){
     document.getElementById('bftdesc').textContent=bd;
     if(wd!==null)document.getElementById('cneedle').style.transform=`rotate(${wd}deg)`;
 
-    // AQI section
-    document.getElementById('aqinum').textContent='—';
-    document.getElementById('pm25').textContent='—';
-    document.getElementById('pm10').textContent='—';
+    // AQI section (static fields from WU)
     document.getElementById('solar').textContent=solar+' W/m²';
     document.getElementById('dewpt').textContent=dp+'°C';
+
+    // ── AQI (Open-Meteo Air Quality) ──
+    if(aqiR.ok){
+      const aqiData=await aqiR.json();
+      const ac=aqiData.current;
+      const eaqi=Math.round(ac.european_aqi??0);
+      const aqiColor=eaqi<=20?'var(--good)':eaqi<=40?'var(--accent2)':eaqi<=60?'var(--warn)':eaqi<=80?'var(--accent3)':'var(--danger)';
+      const aqiLbl=eaqi<=20?'DOBRA':eaqi<=40?'DOBRA':eaqi<=60?'UMIARK.':eaqi<=80?'ZŁA':'B. ZŁA';
+      document.getElementById('aqinum').textContent=eaqi;
+      document.getElementById('aqinum').style.color=aqiColor;
+      document.getElementById('pm25').textContent=r1(ac.pm2_5)+' µg/m³';
+      document.getElementById('pm10').textContent=r1(ac.pm10)+' µg/m³';
+      const arc=document.getElementById('aqiarc');
+      arc.style.stroke=aqiColor;
+      arc.setAttribute('stroke-dashoffset',Math.max(0,116*(1-Math.min(eaqi,100)/100)).toFixed(1));
+      const aqiLblEl=document.querySelector('.aqi-lbl');
+      if(aqiLblEl){aqiLblEl.textContent=aqiLbl;aqiLblEl.style.color=aqiColor;}
+      setPollenCard(ac);
+    }
 
     // comfort
     function setComfort(numId,lblId,barId,advId){
