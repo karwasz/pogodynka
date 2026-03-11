@@ -769,7 +769,7 @@ async function fetchAll(){
 
     // temps
     document.getElementById('tbig').innerHTML=`${temp}<sup>°C</sup>`;
-    document.getElementById('tmaxpill').textContent=r1(m.tempHigh);
+    document.getElementById('tmaxpill').textContent=r1(m.tempHigh??m.temp);
     document.getElementById('tcond').textContent=solar>400?'Słonecznie':solar>100?'Częściowe zachmurzenie':'Pochmurnie';
     document.getElementById('wicon').textContent=solar>500?'☀️':solar>200?'🌤':'🌥';
     document.getElementById('feels').textContent=feelsLike+'°C';
