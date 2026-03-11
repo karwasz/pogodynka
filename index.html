@@ -301,7 +301,7 @@ nav{background:var(--nav);border-bottom:1px solid var(--border);padding:0 28px;d
   <div class="nav-icons">
     <div class="nicon">🔍</div>
     <div class="nicon">⚙️</div>
-    <div class="nicon" onclick="fetchAll()" title="Odśwież">🔄</div>
+    <div class="nicon" id="btn-refresh" onclick="manualRefresh()" title="Odśwież">🔄</div>
   </div>
 </nav>
 
@@ -768,6 +768,7 @@ function makeBarChart(id, labels, data, color){
 }
 
 async function fetchAll(){
+  lastFetch=Date.now();
   try{
     const [currR, histR, meteoR, aqiR] = await Promise.all([
       fetch(CURR), fetch(HIST), fetch(METEO), fetch(AQI_URL)
@@ -1017,6 +1018,25 @@ async function fetchAll(){
     document.getElementById('errtxt').innerHTML='Błąd pobierania danych.<br><small>'+err.message+'</small>';
     console.error(err);
   }
+}
+
+const REFRESH_MIN=5*60*1000;
+let lastFetch=0;
+
+function manualRefresh(){
+  const elapsed=Date.now()-lastFetch;
+  const btn=document.getElementById('btn-refresh');
+  if(elapsed<REFRESH_MIN){
+    const remMin=Math.ceil((REFRESH_MIN-elapsed)/60000);
+    if(btn){
+      btn.title=`Odświeżono przed chwilą — poczekaj ${remMin} min`;
+      btn.style.color='var(--warn)';
+      btn.textContent='⏳';
+      setTimeout(()=>{btn.style.color='';btn.textContent='🔄';btn.title='Odśwież';},2000);
+    }
+    return;
+  }
+  fetchAll();
 }
 
 const NAV_SECTIONS=['sec-pogoda','sec-prognoza','sec-opady','sec-alerty','sec-historia'];
