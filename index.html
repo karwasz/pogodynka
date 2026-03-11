@@ -279,6 +279,40 @@ nav{background:var(--nav);border-bottom:1px solid var(--border);padding:0 28px;d
 .sun-icon{font-size:1.2rem;margin-bottom:3px}
 .sun-lbl{font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:700}
 .sun-val{font-family:var(--mono);font-size:0.95rem;font-weight:700;color:var(--text);margin-top:2px}
+
+/* ═══════════════════════════════
+   SETTINGS & PASSWORD OVERLAYS
+═══════════════════════════════ */
+.settings-overlay{position:fixed;inset:0;background:rgba(5,12,25,0.97);z-index:500;display:none;flex-direction:column;align-items:center;justify-content:flex-start;padding:30px 16px 60px;overflow-y:auto}
+.settings-overlay.open{display:flex}
+.settings-panel{width:100%;max-width:520px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px 28px 24px;margin-top:10px}
+.settings-panel h2{font-size:1.15rem;font-weight:800;color:var(--text)}
+.sdesc{font-size:0.78rem;color:var(--text2);margin-bottom:22px;margin-top:4px}
+.sform-group{margin-bottom:16px}
+.sform-group label{display:block;font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:7px}
+.sform-input{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:var(--mono);font-size:0.88rem;outline:none;transition:border-color 0.2s}
+.sform-input:focus{border-color:var(--accent)}
+.sform-input-wrap{position:relative}
+.sform-input-wrap .sform-input{padding-right:40px}
+.stoggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text2);cursor:pointer;font-size:0.85rem;padding:4px;line-height:1}
+.sbtn-row{display:flex;gap:10px;margin-top:22px}
+.sbtn{flex:1;padding:11px 16px;border-radius:10px;border:none;font-family:var(--sans);font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.2s}
+.sbtn-primary{background:var(--accent);color:#fff}
+.sbtn-primary:hover{background:#3aa8f0}
+.sbtn-secondary{background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text2)}
+.sbtn-secondary:hover{color:var(--text);border-color:rgba(255,255,255,0.15)}
+.ssep{height:1px;background:var(--border);margin:20px 0}
+.sinfo{background:rgba(77,184,255,0.08);border:1px solid rgba(77,184,255,0.15);border-radius:10px;padding:10px 14px;font-size:0.75rem;color:var(--text2);margin-top:14px;line-height:1.6}
+.sinfo strong{color:var(--accent)}
+.smsg{font-size:0.8rem;padding:8px 12px;border-radius:8px;margin-top:12px;display:none}
+.smsg.ok{background:rgba(76,175,125,0.15);border:1px solid rgba(76,175,125,0.3);color:var(--good)}
+.smsg.err{background:rgba(255,64,96,0.1);border:1px solid rgba(255,64,96,0.2);color:var(--danger)}
+.pwdoverlay{position:fixed;inset:0;background:rgba(5,12,25,0.97);z-index:500;display:none;align-items:center;justify-content:center}
+.pwdoverlay.open{display:flex}
+.pwdbox{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:360px}
+.pwdbox h3{font-size:1rem;font-weight:800;margin-bottom:6px}
+.pwdbox p{font-size:0.78rem;color:var(--text2);margin-bottom:18px}
+.pwderr{font-size:0.75rem;color:var(--danger);margin-top:8px;min-height:16px}
 </style>
 </head>
 <body>
@@ -299,11 +333,88 @@ nav{background:var(--nav);border-bottom:1px solid var(--border);padding:0 28px;d
     <button class="ntab" onclick="navClick('sec-historia',this)">📊 Historia</button>
   </div>
   <div class="nav-icons">
-    <div class="nicon">🔍</div>
-    <div class="nicon">⚙️</div>
+<div class="nicon" onclick="openSettings()" title="Ustawienia">⚙️</div>
     <div class="nicon" id="btn-refresh" onclick="manualRefresh()" title="Odśwież">🔄</div>
   </div>
 </nav>
+
+<!-- PASSWORD PROMPT -->
+<div id="pwdoverlay" class="pwdoverlay">
+  <div class="pwdbox">
+    <h3>🔐 Dostęp do ustawień</h3>
+    <p>Wprowadź hasło, aby uzyskać dostęp do konfiguracji stacji.</p>
+    <div class="sform-input-wrap">
+      <input type="password" id="pwdinput" class="sform-input" placeholder="Hasło…" onkeydown="if(event.key==='Enter')checkPassword()">
+      <button class="stoggle" onclick="toggleVis('pwdinput',this)" type="button">👁</button>
+    </div>
+    <div class="pwderr" id="pwderr"></div>
+    <div class="sbtn-row" style="margin-top:16px">
+      <button class="sbtn sbtn-secondary" onclick="document.getElementById('pwdoverlay').classList.remove('open')">Anuluj</button>
+      <button class="sbtn sbtn-primary" onclick="checkPassword()">Wejdź →</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS OVERLAY -->
+<div id="settings-overlay" class="settings-overlay">
+  <div class="settings-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <h2>⚙️ Konfiguracja stacji</h2>
+      <button class="sbtn sbtn-secondary" style="flex:none;padding:6px 14px;font-size:0.8rem" onclick="closeSettings()">✕ Zamknij</button>
+    </div>
+    <div class="sdesc">Dane stacji Weather Underground i klucze API. Konfiguracja zapisywana lokalnie w przeglądarce.</div>
+
+    <div class="sform-group">
+      <label>ID stacji Weather Underground</label>
+      <input type="text" id="set-station" class="sform-input" placeholder="np. INOWYP6" autocomplete="off" spellcheck="false">
+    </div>
+
+    <div class="sform-group">
+      <label>Klucz API Weather Underground</label>
+      <div class="sform-input-wrap">
+        <input type="password" id="set-apikey" class="sform-input" placeholder="••••••••••••••••••••••••••••••••" autocomplete="off" spellcheck="false">
+        <button class="stoggle" onclick="toggleVis('set-apikey',this)" type="button">👁</button>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="sform-group">
+        <label>Szerokość geogr. (lat)</label>
+        <input type="number" id="set-lat" class="sform-input" step="0.001" placeholder="51.896">
+      </div>
+      <div class="sform-group">
+        <label>Długość geogr. (lon)</label>
+        <input type="number" id="set-lon" class="sform-input" step="0.001" placeholder="20.924">
+      </div>
+    </div>
+
+    <div class="ssep"></div>
+
+    <div class="sform-group">
+      <label id="set-pwd-label">Ustaw hasło dostępu</label>
+      <div id="set-pwd-desc" style="font-size:0.72rem;color:var(--warn);margin-bottom:10px">⚠️ Pierwsze uruchomienie — ustaw hasło, aby chronić konfigurację.</div>
+      <div class="sform-input-wrap" style="margin-bottom:10px">
+        <input type="password" id="set-pwd1" class="sform-input" placeholder="Nowe hasło (min. 4 znaki)">
+        <button class="stoggle" onclick="toggleVis('set-pwd1',this)" type="button">👁</button>
+      </div>
+      <div class="sform-input-wrap">
+        <input type="password" id="set-pwd2" class="sform-input" placeholder="Powtórz hasło">
+        <button class="stoggle" onclick="toggleVis('set-pwd2',this)" type="button">👁</button>
+      </div>
+    </div>
+
+    <div id="set-msg" class="smsg"></div>
+
+    <div class="sinfo">
+      <strong>ℹ️ Bezpieczeństwo:</strong> Hasło przechowywane jako hash SHA-256 w localStorage. Klucz API widoczny tylko po zalogowaniu do ustawień.
+    </div>
+
+    <div class="sbtn-row">
+      <button class="sbtn sbtn-secondary" onclick="closeSettings()">Anuluj</button>
+      <button class="sbtn sbtn-primary" onclick="saveSettings()">💾 Zapisz ustawienia</button>
+    </div>
+  </div>
+</div>
 
 <div class="page" id="mainpage" style="display:none">
 
@@ -312,7 +423,7 @@ nav{background:var(--nav);border-bottom:1px solid var(--border);padding:0 28px;d
   <h1>Pogoda w <span id="city">Nowym Prażmowie</span></h1>
   <div class="live-row">
     <div class="lpill"><div class="ldot"></div> LIVE</div>
-    <span>📍 Stacja INOWYP6</span>
+    <span>📍 Stacja <span id="stationlbl">INOWYP6</span></span>
     <span>🕐 <span id="obstime">--</span></span>
   </div>
 </div>
@@ -625,16 +736,19 @@ nav{background:var(--nav);border-bottom:1px solid var(--border);padding:0 28px;d
 </div><!-- /page -->
 
 <script>
-const API_KEY='b7a3062394a24d9ea3062394a2ed9e59';
-const STATION='INOWYP6';
+let API_KEY='b7a3062394a24d9ea3062394a2ed9e59';
+let STATION='INOWYP6';
 // Nowy Prażmów coords for Open-Meteo
-const LAT=51.896, LON=20.924;
+let LAT=51.896, LON=20.924;
 
 const PROXY='https://corsproxy.io/?url=';
-const CURR=PROXY+encodeURIComponent(`https://api.weather.com/v2/pws/observations/current?stationId=${STATION}&format=json&units=m&apiKey=${API_KEY}&numericPrecision=decimal`);
-const HIST=PROXY+encodeURIComponent(`https://api.weather.com/v2/pws/observations/hourly/7day?stationId=${STATION}&format=json&units=m&apiKey=${API_KEY}&numericPrecision=decimal`);
-const METEO=`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weathercode,windspeed_10m_max,sunrise,sunset&hourly=precipitation_probability,precipitation&current_weather=true&timezone=Europe%2FWarsaw&forecast_days=7`;
-const AQI_URL=`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&current=european_aqi,pm2_5,pm10,alder_pollen,birch_pollen,grass_pollen,mugwort_pollen&timezone=Europe%2FWarsaw`;
+let CURR,HIST,METEO,AQI_URL;
+function buildUrls(){
+  CURR=PROXY+encodeURIComponent(`https://api.weather.com/v2/pws/observations/current?stationId=${STATION}&format=json&units=m&apiKey=${API_KEY}&numericPrecision=decimal`);
+  HIST=PROXY+encodeURIComponent(`https://api.weather.com/v2/pws/observations/hourly/7day?stationId=${STATION}&format=json&units=m&apiKey=${API_KEY}&numericPrecision=decimal`);
+  METEO=`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weathercode,windspeed_10m_max,sunrise,sunset&hourly=precipitation_probability,precipitation&current_weather=true&timezone=Europe%2FWarsaw&forecast_days=7`;
+  AQI_URL=`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&current=european_aqi,pm2_5,pm10,alder_pollen,birch_pollen,grass_pollen,mugwort_pollen&timezone=Europe%2FWarsaw`;
+}
 
 function r1(v){return(v!==null&&v!==undefined)?Math.round(v*10)/10:'--'}
 function r0(v){return(v!==null&&v!==undefined)?Math.round(v):'--'}
@@ -1020,6 +1134,109 @@ async function fetchAll(){
   }
 }
 
+// ── SETTINGS ──
+async function hashPwd(pwd){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(pwd));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function loadSettings(){
+  const s=localStorage.getItem('wx_station');
+  const k=localStorage.getItem('wx_apikey');
+  const la=localStorage.getItem('wx_lat');
+  const lo=localStorage.getItem('wx_lon');
+  if(s) STATION=s;
+  if(k) API_KEY=k;
+  if(la) LAT=parseFloat(la);
+  if(lo) LON=parseFloat(lo);
+  buildUrls();
+  const lbl=document.getElementById('stationlbl');
+  if(lbl) lbl.textContent=STATION;
+}
+function toggleVis(id,btn){
+  const el=document.getElementById(id);
+  el.type=el.type==='password'?'text':'password';
+  btn.textContent=el.type==='password'?'👁':'🙈';
+}
+function openSettings(){
+  if(!localStorage.getItem('wx_pwdhash')){
+    showSettingsPanel();
+  } else {
+    document.getElementById('pwdoverlay').classList.add('open');
+    document.getElementById('pwdinput').value='';
+    document.getElementById('pwderr').textContent='';
+    setTimeout(()=>document.getElementById('pwdinput').focus(),100);
+  }
+}
+async function checkPassword(){
+  const val=document.getElementById('pwdinput').value;
+  if(!val){document.getElementById('pwderr').textContent='Wprowadź hasło.';return;}
+  const h=await hashPwd(val);
+  if(h===localStorage.getItem('wx_pwdhash')){
+    document.getElementById('pwdoverlay').classList.remove('open');
+    showSettingsPanel();
+  } else {
+    document.getElementById('pwderr').textContent='Nieprawidłowe hasło.';
+    document.getElementById('pwdinput').value='';
+    document.getElementById('pwdinput').focus();
+  }
+}
+function showSettingsPanel(){
+  document.getElementById('set-station').value=STATION;
+  document.getElementById('set-apikey').value=API_KEY;
+  document.getElementById('set-lat').value=LAT;
+  document.getElementById('set-lon').value=LON;
+  document.getElementById('set-pwd1').value='';
+  document.getElementById('set-pwd2').value='';
+  document.getElementById('set-msg').style.display='none';
+  const hasPwd=!!localStorage.getItem('wx_pwdhash');
+  document.getElementById('set-pwd-label').textContent=hasPwd?'Zmień hasło (zostaw puste, aby nie zmieniać)':'Ustaw hasło dostępu';
+  document.getElementById('set-pwd-desc').style.display=hasPwd?'none':'block';
+  document.getElementById('settings-overlay').classList.add('open');
+}
+function closeSettings(){
+  document.getElementById('settings-overlay').classList.remove('open');
+}
+async function saveSettings(){
+  const station=document.getElementById('set-station').value.trim().toUpperCase();
+  const apikey=document.getElementById('set-apikey').value.trim();
+  const lat=parseFloat(document.getElementById('set-lat').value);
+  const lon=parseFloat(document.getElementById('set-lon').value);
+  const pwd1=document.getElementById('set-pwd1').value;
+  const pwd2=document.getElementById('set-pwd2').value;
+  const msg=document.getElementById('set-msg');
+  if(!station||!apikey){
+    msg.textContent='ID stacji i klucz API są wymagane.';
+    msg.className='smsg err';msg.style.display='block';return;
+  }
+  if(isNaN(lat)||isNaN(lon)){
+    msg.textContent='Nieprawidłowe współrzędne.';
+    msg.className='smsg err';msg.style.display='block';return;
+  }
+  const hasPwd=!!localStorage.getItem('wx_pwdhash');
+  if(pwd1||!hasPwd){
+    if(pwd1.length<4){
+      msg.textContent='Hasło musi mieć co najmniej 4 znaki.';
+      msg.className='smsg err';msg.style.display='block';return;
+    }
+    if(pwd1!==pwd2){
+      msg.textContent='Hasła nie są zgodne.';
+      msg.className='smsg err';msg.style.display='block';return;
+    }
+    localStorage.setItem('wx_pwdhash',await hashPwd(pwd1));
+  }
+  localStorage.setItem('wx_station',station);
+  localStorage.setItem('wx_apikey',apikey);
+  localStorage.setItem('wx_lat',String(lat));
+  localStorage.setItem('wx_lon',String(lon));
+  STATION=station;API_KEY=apikey;LAT=lat;LON=lon;
+  buildUrls();
+  const lbl=document.getElementById('stationlbl');
+  if(lbl) lbl.textContent=STATION;
+  msg.textContent='Zapisano pomyślnie! Pobieram nowe dane…';
+  msg.className='smsg ok';msg.style.display='block';
+  setTimeout(()=>{closeSettings();lastFetch=0;fetchAll();},1200);
+}
+
 const REFRESH_MIN=5*60*1000;
 let lastFetch=0;
 
@@ -1080,6 +1297,7 @@ function initScrollSpy(){
   onScroll();
 }
 
+loadSettings();
 fetchAll();
 setInterval(fetchAll,5*60*1000);
 </script>
