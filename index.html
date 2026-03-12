@@ -747,14 +747,22 @@ const PROXIES=[
   url=>'https://cors-anywhere.herokuapp.com/'+url,
 ];
 async function fetchWithFallback(rawUrl){
+  const errs=[];
   for(const proxy of PROXIES){
+    const proxyUrl=proxy(rawUrl);
     try{
-      const res=await fetch(proxy(rawUrl),{signal:AbortSignal.timeout(8000)});
-      if(!res.ok) continue;
-      return await res.json();
-    }catch(e){continue;}
+      const res=await fetch(proxyUrl,{signal:AbortSignal.timeout(8000)});
+      if(!res.ok){errs.push(`${new URL(proxyUrl).hostname}: HTTP ${res.status}`);continue;}
+      const data=await res.json();
+      return data;
+    }catch(e){
+      errs.push(`${new URL(proxyUrl).hostname}: ${e.message||e}`);
+      continue;
+    }
   }
-  throw new Error('Wszystkie proxy niedostępne dla: '+rawUrl);
+  const msg='Wszystkie proxy niedostępne:\n'+errs.join('\n');
+  console.error(msg,'\nURL:',rawUrl);
+  throw new Error(msg);
 }
 
 let CURR,HIST,METEO,AQI_URL;
@@ -899,9 +907,13 @@ function makeBarChart(id, labels, data, color){
 async function fetchAll(){
   lastFetch=Date.now();
   try{
-    const [curr, histR, meteoR, aqiR] = await Promise.all([
-      fetchWithFallback(CURR), fetchWithFallback(HIST), fetch(METEO), fetch(AQI_URL)
+    const [curr, meteoR, aqiR] = await Promise.all([
+      fetchWithFallback(CURR), fetch(METEO), fetch(AQI_URL)
     ]);
+    const histR = await fetchWithFallback(HIST).catch(e=>{
+      console.warn('Historia WU niedostępna:',e.message);
+      return null;
+    });
 
     // ── CURRENT ──
     if(!curr?.observations?.[0]) throw new Error('Brak danych obserwacji WU');
