@@ -741,11 +741,26 @@ let STATION='INOWYP6';
 // Nowy Prażmów coords for Open-Meteo
 let LAT=51.896, LON=20.924;
 
-const PROXY='https://corsproxy.io/?url=';
+const PROXIES=[
+  url=>'https://api.allorigins.win/raw?url='+encodeURIComponent(url),
+  url=>'https://corsproxy.io/?url='+encodeURIComponent(url),
+  url=>'https://cors-anywhere.herokuapp.com/'+url,
+];
+async function fetchWithFallback(rawUrl){
+  for(const proxy of PROXIES){
+    try{
+      const res=await fetch(proxy(rawUrl),{signal:AbortSignal.timeout(8000)});
+      if(!res.ok) continue;
+      return await res.json();
+    }catch(e){continue;}
+  }
+  throw new Error('Wszystkie proxy niedostępne dla: '+rawUrl);
+}
+
 let CURR,HIST,METEO,AQI_URL;
 function buildUrls(){
-  CURR=PROXY+encodeURIComponent(`https://api.weather.com/v2/pws/observations/current?stationId=${STATION}&format=json&units=m&apiKey=${API_KEY}&numericPrecision=decimal`);
-  HIST=PROXY+encodeURIComponent(`https://api.weather.com/v2/pws/observations/hourly/7day?stationId=${STATION}&format=json&units=m&apiKey=${API_KEY}&numericPrecision=decimal`);
+  CURR=`https://api.weather.com/v2/pws/observations/current?stationId=${STATION}&format=json&units=m&apiKey=${API_KEY}&numericPrecision=decimal`;
+  HIST=`https://api.weather.com/v2/pws/observations/hourly/7day?stationId=${STATION}&format=json&units=m&apiKey=${API_KEY}&numericPrecision=decimal`;
   METEO=`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weathercode,windspeed_10m_max,sunrise,sunset&hourly=precipitation_probability,precipitation&current_weather=true&timezone=Europe%2FWarsaw&forecast_days=7`;
   AQI_URL=`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&current=european_aqi,pm2_5,pm10,alder_pollen,birch_pollen,grass_pollen,mugwort_pollen&timezone=Europe%2FWarsaw`;
 }
@@ -884,13 +899,12 @@ function makeBarChart(id, labels, data, color){
 async function fetchAll(){
   lastFetch=Date.now();
   try{
-    const [currR, histR, meteoR, aqiR] = await Promise.all([
-      fetch(CURR), fetch(HIST), fetch(METEO), fetch(AQI_URL)
+    const [curr, histR, meteoR, aqiR] = await Promise.all([
+      fetchWithFallback(CURR), fetchWithFallback(HIST), fetch(METEO), fetch(AQI_URL)
     ]);
 
     // ── CURRENT ──
-    if(!currR.ok) throw new Error(`WU HTTP ${currR.status}`);
-    const curr=await currR.json();
+    if(!curr?.observations?.[0]) throw new Error('Brak danych obserwacji WU');
     const obs=curr.observations[0];
     const m=obs.metric;
 
@@ -1094,9 +1108,8 @@ async function fetchAll(){
     }
 
     // ── HISTORY (WU hourly) ──
-    if(histR.ok){
-      const hist=await histR.json();
-      const obs24=(hist.observations||[]).slice(-24);
+    if(histR?.observations){
+      const obs24=(histR.observations||[]).slice(-24);
       const hLabels=obs24.map(o=>{const d=new Date(o.obsTimeLocal);return d.getHours()+':00'});
       const hTemps=obs24.map(o=>o.metric?.tempAvg??null);
       const hRains=obs24.map(o=>o.metric?.precipTotal??0);
